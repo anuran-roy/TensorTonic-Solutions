@@ -1,0 +1,1 @@
+These are `float*`, not `float**`. With flat pointers we have to linearize manually: `A[row * N + col]`.
