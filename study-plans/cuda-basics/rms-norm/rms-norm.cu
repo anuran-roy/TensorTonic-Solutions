@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
 #include <math.h>
 
+// Just a few simple optimizations to increase performance by a bit. 
 __global__ void rms_norm_kernel(const float* input, const float* gamma, float* output, int M, int N, float eps) {
     // Write code here
     float sum = 0.0f;
@@ -8,15 +9,16 @@ __global__ void rms_norm_kernel(const float* input, const float* gamma, float* o
 
     for(int i = 0; i < N; i++) {
         // Now we need to cover the columns.
-        sum += pow(input[row*N + i], 2) + eps;
+        sum += input[row*N + i] * input[row*N + i];
     }
     sum /= N*1.0f;
+    sum += eps;
 
     float rms = sqrtf(sum);
 
     for(int i = threadIdx.x ; i < N; i+= blockDim.x) {
         // Now we need to cover the columns.
-        output[row*N + i] += input[row*N + i]/rms * gamma[i];
+        output[row*N + i] = input[row*N + i]/rms * gamma[i];
     }
 }
 
